@@ -1,0 +1,270 @@
+<div class="container mt-4">
+  <div class="card">
+    <div
+      class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+    >
+      <h3 class="mb-0">{{ pageTitle }}</h3>
+      <button
+        type="button"
+        class="btn btn-link text-white p-0"
+        (click)="onCancel()"
+        [disabled]="isSubmitting"
+        title="Cancel"
+        style="font-size: 2rem; text-decoration: none; opacity: 0.9"
+      >
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Error Message -->
+      <div
+        *ngIf="errorMessage"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        {{ errorMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="errorMessage = ''"
+        ></button>
+      </div>
+
+      <!-- Customer Form -->
+      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <!-- Customer Name -->
+          <div class="col-md-6 mb-3">
+            <label for="customerName" class="form-label">
+              Customer Name <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              formControlName="customerName"
+              [class.is-invalid]="
+                hasError('customerName', 'required') ||
+                hasError('customerName', 'maxlength')
+              "
+              placeholder="Enter customer name"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="customerForm.get('customerName')?.touched"
+            >
+              {{ getErrorMessage("customerName") }}
+            </div>
+          </div>
+
+          <!-- Site -->
+          <div class="col-md-6 mb-3">
+            <label for="site" class="form-label">
+              Site <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="site"
+              formControlName="site"
+              [class.is-invalid]="
+                hasError('site', 'required') || hasError('site', 'maxlength')
+              "
+              placeholder="Enter site location"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="customerForm.get('site')?.touched"
+            >
+              {{ getErrorMessage("site") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-3">
+          <label for="address" class="form-label">
+            Address <span class="text-danger">*</span>
+          </label>
+          <textarea
+            class="form-control"
+            id="address"
+            formControlName="address"
+            rows="3"
+            [class.is-invalid]="
+              hasError('address', 'required') ||
+              hasError('address', 'maxlength')
+            "
+            placeholder="Enter complete address"
+          ></textarea>
+          <div
+            class="invalid-feedback"
+            *ngIf="customerForm.get('address')?.touched"
+          >
+            {{ getErrorMessage("address") }}
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Email -->
+          <div class="col-md-6 mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              formControlName="email"
+              [class.is-invalid]="hasError('email', 'email')"
+              placeholder="customer@example.com"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="customerForm.get('email')?.touched"
+            >
+              {{ getErrorMessage("email") }}
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="col-md-6 mb-3">
+            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <input
+              type="text"
+              class="form-control"
+              id="phoneNumber"
+              formControlName="phoneNumber"
+              placeholder="+1234567890"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Customer Type -->
+          <div class="col-md-6 mb-3">
+            <label for="customerType" class="form-label">
+              Customer Type <span class="text-danger">*</span>
+            </label>
+            <select
+              class="form-select"
+              id="customerType"
+              formControlName="customerType"
+              [class.is-invalid]="hasError('customerType', 'required')"
+            >
+              <option value="AMC">AMC</option>
+              <option value="Other">Other</option>
+            </select>
+            <div
+              class="invalid-feedback"
+              *ngIf="customerForm.get('customerType')?.touched"
+            >
+              {{ getErrorMessage("customerType") }}
+            </div>
+          </div>
+
+          <!-- Active Status -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label d-block">Status</label>
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="isActive"
+                formControlName="isActive"
+              />
+              <label class="form-check-label" for="isActive"> Active </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Details Section -->
+        <hr class="my-4" />
+        <h5 class="mb-3 text-secondary">Additional Details (Optional)</h5>
+
+        <!-- Lab Details -->
+        <div class="mb-3">
+          <label for="labDetails" class="form-label">Lab Details</label>
+          <textarea
+            class="form-control"
+            id="labDetails"
+            formControlName="labDetails"
+            rows="3"
+            placeholder="Enter lab details"
+          ></textarea>
+        </div>
+
+        <div class="row">
+          <!-- License No -->
+          <div class="col-md-6 mb-3">
+            <label for="licenseNo" class="form-label">License No</label>
+            <input
+              type="text"
+              class="form-control"
+              id="licenseNo"
+              formControlName="licenseNo"
+              placeholder="Enter license number"
+            />
+          </div>
+
+          <!-- Total No of Licenses -->
+          <div class="col-md-6 mb-3">
+            <label for="totalNoOfLicenses" class="form-label"
+              >Total No of Licenses</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              id="totalNoOfLicenses"
+              formControlName="totalNoOfLicenses"
+              placeholder="Enter total number of licenses"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Software Version -->
+          <div class="col-md-6 mb-3">
+            <label for="softwareVersion" class="form-label"
+              >Software Version</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="softwareVersion"
+              formControlName="softwareVersion"
+              placeholder="Enter software version"
+            />
+          </div>
+
+          <!-- MU -->
+          <div class="col-md-6 mb-3">
+            <label for="mu" class="form-label">MU</label>
+            <input
+              type="text"
+              class="form-control"
+              id="mu"
+              formControlName="mu"
+              placeholder="Enter MU"
+            />
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end mt-4">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmitting || customerForm.invalid"
+          >
+            <span
+              *ngIf="isSubmitting"
+              class="spinner-border spinner-border-sm me-2"
+            ></span>
+            <i *ngIf="!isSubmitting" class="bi bi-check-circle"></i>
+            {{ isEditMode ? "Update" : "Create" }} Customer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

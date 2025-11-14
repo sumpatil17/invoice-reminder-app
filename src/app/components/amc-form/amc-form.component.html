@@ -1,0 +1,273 @@
+<div class="container mt-4">
+  <div class="card">
+    <div
+      class="card-header bg-success text-white d-flex justify-content-between align-items-center"
+    >
+      <h3 class="mb-0">{{ pageTitle }}</h3>
+      <button
+        type="button"
+        class="btn btn-link text-white p-0"
+        (click)="onCancel()"
+        [disabled]="isSubmitting"
+        title="Cancel"
+        style="font-size: 2rem; text-decoration: none; opacity: 0.9"
+      >
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Error Message -->
+      <div
+        *ngIf="errorMessage"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        {{ errorMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="errorMessage = ''"
+        ></button>
+      </div>
+
+      <!-- AMC Form -->
+      <form [formGroup]="amcForm" (ngSubmit)="onSubmit()">
+        <!-- Customer Selection -->
+        <div class="mb-3">
+          <label for="customerId" class="form-label">
+            Customer <span class="text-danger">*</span>
+          </label>
+          <select
+            class="form-select"
+            id="customerId"
+            formControlName="customerId"
+            [class.is-invalid]="hasError('customerId', 'required')"
+          >
+            <option [ngValue]="null">Select a customer</option>
+            <option
+              *ngFor="let customer of customers"
+              [ngValue]="customer.customerId"
+            >
+              {{ customer.displayName }}
+            </option>
+          </select>
+          <div
+            class="invalid-feedback"
+            *ngIf="amcForm.get('customerId')?.touched"
+          >
+            {{ getErrorMessage("customerId") }}
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- PO Number -->
+          <div class="col-md-6 mb-3">
+            <label for="poNumber" class="form-label">
+              PO Number <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="poNumber"
+              formControlName="poNumber"
+              [class.is-invalid]="
+                hasError('poNumber', 'required') ||
+                hasError('poNumber', 'maxlength')
+              "
+              placeholder="Enter PO number"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="amcForm.get('poNumber')?.touched"
+            >
+              {{ getErrorMessage("poNumber") }}
+            </div>
+          </div>
+
+          <!-- PO Date -->
+          <div class="col-md-6 mb-3">
+            <label for="poDate" class="form-label">
+              PO Date <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              id="poDate"
+              formControlName="poDate"
+              [class.is-invalid]="hasError('poDate', 'required')"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="amcForm.get('poDate')?.touched"
+            >
+              {{ getErrorMessage("poDate") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- PO Value -->
+        <div class="mb-3">
+          <label for="poValue" class="form-label">
+            PO Value (USD) <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              class="form-control"
+              id="poValue"
+              formControlName="poValue"
+              [class.is-invalid]="
+                hasError('poValue', 'required') || hasError('poValue', 'min')
+              "
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="amcForm.get('poValue')?.touched"
+            >
+              {{ getErrorMessage("poValue") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiply Factor -->
+        <div class="mb-3">
+          <label for="multiplyFactor" class="form-label">
+            Multiply Factor (USD to INR) <span class="text-danger">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            id="multiplyFactor"
+            formControlName="multiplyFactor"
+            [class.is-invalid]="
+              hasError('multiplyFactor', 'required') ||
+              hasError('multiplyFactor', 'min')
+            "
+            placeholder="83.00"
+            step="0.01"
+            min="0"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="amcForm.get('multiplyFactor')?.touched"
+          >
+            {{ getErrorMessage("multiplyFactor") }}
+          </div>
+        </div>
+
+        <!-- PO Value in INR (Read-only, Calculated) -->
+        <div class="mb-3">
+          <label for="poValueINR" class="form-label">
+            PO Value (INR) <span class="badge bg-info">Auto-calculated</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text">₹</span>
+            <input
+              type="text"
+              class="form-control bg-light"
+              id="poValueINR"
+              [value]="poValueInINR | number : '1.2-2'"
+              readonly
+              disabled
+            />
+          </div>
+          <small class="text-muted"
+            >This value is calculated by PO Value (USD) * Multiply Factor</small
+          >
+        </div>
+
+        <div class="row">
+          <!-- AMC Start Date -->
+          <div class="col-md-6 mb-3">
+            <label for="amcStartDate" class="form-label">
+              AMC Start Date <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              id="amcStartDate"
+              formControlName="amcStartDate"
+              [class.is-invalid]="hasError('amcStartDate', 'required')"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="amcForm.get('amcStartDate')?.touched"
+            >
+              {{ getErrorMessage("amcStartDate") }}
+            </div>
+          </div>
+
+          <!-- AMC End Date -->
+          <div class="col-md-6 mb-3">
+            <label for="amcEndDate" class="form-label">
+              AMC End Date <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              id="amcEndDate"
+              formControlName="amcEndDate"
+              [class.is-invalid]="hasError('amcEndDate', 'required')"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="amcForm.get('amcEndDate')?.touched"
+            >
+              {{ getErrorMessage("amcEndDate") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="description"
+            formControlName="description"
+            rows="3"
+            [class.is-invalid]="hasError('description', 'maxlength')"
+            placeholder="Enter contract description (optional)"
+          ></textarea>
+          <div
+            class="invalid-feedback"
+            *ngIf="amcForm.get('description')?.touched"
+          >
+            {{ getErrorMessage("description") }}
+          </div>
+        </div>
+
+        <!-- Status (only in edit mode) -->
+        <div class="mb-3" *ngIf="isEditMode">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status" formControlName="status">
+            <option value="Active">Active</option>
+            <option value="Expired">Expired</option>
+            <option value="Renewed">Renewed</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end mt-4">
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="isSubmitting || amcForm.invalid"
+          >
+            <span
+              *ngIf="isSubmitting"
+              class="spinner-border spinner-border-sm me-2"
+            ></span>
+            <i *ngIf="!isSubmitting" class="bi bi-check-circle"></i>
+            {{ isEditMode ? "Update" : "Create" }} AMC Contract
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

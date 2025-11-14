@@ -1,0 +1,246 @@
+<div class="container mt-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="mb-0">Invoice Reminder Dashboard</h2>
+      <p class="text-muted">Overview of customers and AMC contracts</p>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div *ngIf="!isLoading" class="row mb-4">
+    <!-- Total Customers Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-primary h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title text-uppercase mb-2">Total Customers</h6>
+              <h2 class="mb-0">{{ totalCustomers }}</h2>
+            </div>
+            <div>
+              <i
+                class="bi bi-people-fill"
+                style="font-size: 3rem; opacity: 0.3"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <a
+            href="javascript:void(0)"
+            (click)="viewCustomers()"
+            class="text-white text-decoration-none"
+          >
+            View all <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Contracts Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-success h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title text-uppercase mb-2">Total Contracts</h6>
+              <h2 class="mb-0">{{ totalContracts }}</h2>
+            </div>
+            <div>
+              <i
+                class="bi bi-file-text-fill"
+                style="font-size: 3rem; opacity: 0.3"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <a
+            href="javascript:void(0)"
+            (click)="viewContracts()"
+            class="text-white text-decoration-none"
+          >
+            View all <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiring Soon Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-warning h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title text-uppercase mb-2">Expiring Soon</h6>
+              <h2 class="mb-0">{{ expiringContracts.length }}</h2>
+            </div>
+            <div>
+              <i
+                class="bi bi-exclamation-triangle-fill"
+                style="font-size: 3rem; opacity: 0.3"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <a
+            href="javascript:void(0)"
+            (click)="viewExpiringContracts()"
+            class="text-white text-decoration-none"
+          >
+            View details <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expired Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-danger h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title text-uppercase mb-2">Expired</h6>
+              <h2 class="mb-0">{{ expiredContracts.length }}</h2>
+            </div>
+            <div>
+              <i
+                class="bi bi-x-circle-fill"
+                style="font-size: 3rem; opacity: 0.3"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <a
+            href="javascript:void(0)"
+            (click)="viewExpiringContracts()"
+            class="text-white text-decoration-none"
+          >
+            View details <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reminders Section -->
+  <div *ngIf="!isLoading" class="row">
+    <!-- Expiring Contracts -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-warning text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-bell-fill"></i> Contracts Expiring Soon (30 days)
+          </h5>
+        </div>
+        <div class="card-body">
+          <div
+            *ngIf="expiringContracts.length === 0"
+            class="text-center text-muted py-4"
+          >
+            <i class="bi bi-check-circle" style="font-size: 3rem"></i>
+            <p class="mt-2 mb-0">No contracts expiring soon</p>
+          </div>
+
+          <div
+            *ngIf="expiringContracts.length > 0"
+            class="list-group list-group-flush"
+          >
+            <a
+              *ngFor="let contract of expiringContracts.slice(0, 5)"
+              href="javascript:void(0)"
+              (click)="viewContract(contract.amcId)"
+              class="list-group-item list-group-item-action"
+            >
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">{{ contract.customer?.customerName }}</h6>
+                <small class="text-danger">
+                  <i class="bi bi-clock"></i>
+                  {{ calculateDaysUntilExpiry(contract.amcEndDate) }} days
+                </small>
+              </div>
+              <p class="mb-1">PO: {{ contract.poNumber }}</p>
+              <small class="text-muted"
+                >Expires: {{ formatDate(contract.amcEndDate) }}</small
+              >
+            </a>
+          </div>
+
+          <div *ngIf="expiringContracts.length > 5" class="text-center mt-3">
+            <button
+              class="btn btn-sm btn-outline-warning"
+              (click)="viewExpiringContracts()"
+            >
+              View all {{ expiringContracts.length }} contracts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expired Contracts -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-exclamation-circle-fill"></i> Expired Contracts
+          </h5>
+        </div>
+        <div class="card-body">
+          <div
+            *ngIf="expiredContracts.length === 0"
+            class="text-center text-muted py-4"
+          >
+            <i class="bi bi-check-circle" style="font-size: 3rem"></i>
+            <p class="mt-2 mb-0">No expired contracts</p>
+          </div>
+
+          <div
+            *ngIf="expiredContracts.length > 0"
+            class="list-group list-group-flush"
+          >
+            <a
+              *ngFor="let contract of expiredContracts.slice(0, 5)"
+              href="javascript:void(0)"
+              (click)="viewContract(contract.amcId)"
+              class="list-group-item list-group-item-action"
+            >
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">{{ contract.customer?.customerName }}</h6>
+                <small class="text-danger">
+                  <i class="bi bi-x-circle"></i> Expired
+                </small>
+              </div>
+              <p class="mb-1">
+                PO: {{ contract.poNumber }} -
+                {{ formatCurrency(contract.poValue) }}
+              </p>
+              <small class="text-muted"
+                >Expired: {{ formatDate(contract.amcEndDate) }}</small
+              >
+            </a>
+          </div>
+
+          <div *ngIf="expiredContracts.length > 5" class="text-center mt-3">
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="viewExpiringContracts()"
+            >
+              View all {{ expiredContracts.length }} contracts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

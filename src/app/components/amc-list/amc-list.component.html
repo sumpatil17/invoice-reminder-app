@@ -1,0 +1,209 @@
+<div class="container mt-4">
+  <!-- Back Button - Dynamic based on view -->
+  <div class="mb-3">
+    <button *ngIf="!customerId" class="btn btn-success" routerLink="/dashboard">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </button>
+    <button *ngIf="customerId" class="btn btn-success" routerLink="/customers">
+      <i class="bi bi-arrow-left"></i> Back to Customers
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      <h3 class="mb-0">
+        AMC Contracts & Invoice Reminders
+        <span *ngIf="getReminderCount() > 0" class="badge bg-danger ms-2">
+          {{ getReminderCount() }} Reminders
+        </span>
+      </h3>
+    </div>
+    <div class="card-body">
+      <!-- Success/Error Messages -->
+      <div
+        *ngIf="successMessage"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        {{ successMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="successMessage = ''"
+        ></button>
+      </div>
+
+      <div
+        *ngIf="errorMessage"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        {{ errorMessage }}
+        <button
+          type="button"
+          class="btn-close"
+          (click)="errorMessage = ''"
+        ></button>
+      </div>
+
+      <!-- Filter and Add Section -->
+      <div class="row mb-3">
+        <div class="col-md-8">
+          <div class="btn-group" role="group">
+            <input
+              type="radio"
+              class="btn-check"
+              name="filter"
+              id="filterAll"
+              [(ngModel)]="filterType"
+              value="all"
+              (change)="applyFilter()"
+            />
+            <label class="btn btn-outline-primary" for="filterAll">
+              All ({{ amcContracts.length }})
+            </label>
+
+            <input
+              type="radio"
+              class="btn-check"
+              name="filter"
+              id="filterActive"
+              [(ngModel)]="filterType"
+              value="active"
+              (change)="applyFilter()"
+            />
+            <label class="btn btn-outline-success" for="filterActive">
+              Active
+            </label>
+
+            <input
+              type="radio"
+              class="btn-check"
+              name="filter"
+              id="filterExpiring"
+              [(ngModel)]="filterType"
+              value="expiring"
+              (change)="applyFilter()"
+            />
+            <label class="btn btn-outline-warning" for="filterExpiring">
+              Expiring Soon
+            </label>
+
+            <input
+              type="radio"
+              class="btn-check"
+              name="filter"
+              id="filterExpired"
+              [(ngModel)]="filterType"
+              value="expired"
+              (change)="applyFilter()"
+            />
+            <label class="btn btn-outline-danger" for="filterExpired">
+              Expired
+            </label>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <button class="btn btn-success" (click)="addAMCContract()">
+            <i class="bi bi-plus-circle"></i> Add New AMC Contract
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="text-center my-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- AMC Contracts Table -->
+      <div *ngIf="!isLoading" class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead class="table-light">
+            <tr>
+              <th>PO Number</th>
+              <th>Customer</th>
+              <th>Site</th>
+              <th>PO Date</th>
+              <th>PO Value</th>
+              <th>AMC Start</th>
+              <th>AMC End</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let contract of filteredContracts"
+              [class.table-danger]="contract.isExpired"
+              [class.table-warning]="
+                contract.isExpiringSoon && !contract.isExpired
+              "
+            >
+              <td>
+                <strong>{{ contract.poNumber }}</strong>
+              </td>
+              <td>{{ contract.customer?.customerName || "N/A" }}</td>
+              <td>{{ contract.customer?.site || "N/A" }}</td>
+              <td>{{ formatDate(contract.poDate) }}</td>
+              <td>{{ formatCurrency(contract.poValue) }}</td>
+              <td>{{ formatDate(contract.amcStartDate) }}</td>
+              <td>{{ formatDate(contract.amcEndDate) }}</td>
+              <td>
+                <span [class]="getStatusBadgeClass(contract)">
+                  {{ getStatusText(contract) }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button
+                    class="btn btn-sm btn-primary"
+                    (click)="editAMCContract(contract.amcId)"
+                    title="Edit"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="
+                      deleteAMCContract(contract.amcId, contract.poNumber)
+                    "
+                    title="Delete"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredContracts.length === 0">
+              <td colspan="8" class="text-center text-muted py-4">
+                No AMC contracts found. Click "Add New AMC Contract" to get
+                started.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Results Count -->
+      <div
+        *ngIf="!isLoading && filteredContracts.length > 0"
+        class="text-muted mt-2"
+      >
+        Showing {{ filteredContracts.length }} contract(s)
+      </div>
+
+      <!-- Reminder Summary -->
+      <div
+        *ngIf="!isLoading && getReminderCount() > 0"
+        class="alert alert-warning mt-3"
+      >
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <strong>Attention:</strong> You have
+        {{ getReminderCount() }} contract(s) that require attention (expiring
+        soon or expired).
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,8 +3,13 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'invoice-reminder-app';
+  title = 'Invoice Reminder System';
+  isNavCollapsed = true;
+
+  toggleNav(): void {
+    this.isNavCollapsed = !this.isNavCollapsed;
+  }
 }
