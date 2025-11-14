@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: invoice-reminder-frontend
+    env: static
+    buildCommand: npm install && npm run build --prod
+    staticPublishPath: ./dist/invoice-reminder-app/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
